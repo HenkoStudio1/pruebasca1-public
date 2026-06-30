@@ -1,0 +1,20 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# vercel
+.vercel
+
+# system
+.DS_Store
+
+# env
+.env
+.env.*
+
+# respaldo local de imagenes originales (no subir)
+originals_backup/
+.claude/

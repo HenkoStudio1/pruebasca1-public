@@ -1,0 +1,67 @@
+---
+import site from '../data/site.json';
+import contacto from '../data/contacto.json';
+const year = new Date().getFullYear();
+
+const links = [
+  { label: 'Espacios', href: '/#espacios' },
+  { label: 'Instalaciones', href: '/#instalaciones' },
+  { label: 'Tour Virtual', href: '/#tour' },
+  { label: 'Noticias', href: '/#noticias' },
+  { label: 'Ubicación', href: '/#ubicacion' },
+  { label: 'Contacto', href: '/#contacto' },
+];
+---
+
+<footer class="bg-navy-deep text-white/60">
+  <!-- Main footer -->
+  <div class="max-w-[1310px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Brand -->
+      <div>
+        <div class="mb-4">
+          <img src="/logo_2.png" alt="Plaza Paseo del Parque" class="h-12 w-auto" />
+        </div>
+        <p class="text-sm leading-relaxed max-w-xs">
+          {site.footerDescripcion}
+        </p>
+      </div>
+
+      <!-- Links -->
+      <div>
+        <h4 class="text-white font-semibold text-xs uppercase tracking-wider mb-4">Navegación</h4>
+        <ul class="space-y-2">
+          {links.map((link) => (
+            <li>
+              <a href={link.href} class="text-sm hover:text-primary transition-colors duration-200">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div>
+        <h4 class="text-white font-semibold text-xs uppercase tracking-wider mb-4">Contacto</h4>
+        <ul class="space-y-2 text-sm">
+          <li>{contacto.telefono}</li>
+          <li>{contacto.email}</li>
+          <li>Tijuana, B.C., México</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="border-t border-white/10">
+    <div class="max-w-[1310px] mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="text-xs">
+        &copy; {year} Plaza Paseo del Parque. Todos los derechos reservados.
+      </p>
+      <p class="text-xs">
+        {site.footerCreditos}
+      </p>
+    </div>
+  </div>
+</footer>

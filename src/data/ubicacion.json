@@ -1,0 +1,12 @@
+{
+  "etiqueta": "Ubicación estratégica",
+  "titulo": "Ubicación",
+  "mapaUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3365.206776318487!2d-116.93893602238406!3d32.49390209839738!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80d9392128eca285%3A0xe188a30b96302e8c!2sPlaza%20Paseo%20del%20Parque!5e0!3m2!1ses!2smx!4v1775855088549!5m2!1ses!2smx",
+  "puntos": [
+    { "name": "Parque Morelos", "time": "5 min" },
+    { "name": "Blvd. Agua Caliente", "time": "3 min" },
+    { "name": "Garita de San Ysidro", "time": "20 min" },
+    { "name": "Centro Comercial Río", "time": "8 min" },
+    { "name": "Aeropuerto de Tijuana", "time": "15 min" }
+  ]
+}

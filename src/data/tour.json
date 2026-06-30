@@ -1,0 +1,15 @@
+{
+  "etiqueta": "Recorrido inmersivo",
+  "titulo": "Conoce nuestras instalaciones",
+  "subtitulo": "Explora Plaza Paseo del Parque desde cualquier lugar. Haz clic y arrastra para moverte.",
+  "vistas": [
+    { "img": "/2.webp", "label": "Vista 1" },
+    { "img": "/3.webp", "label": "Vista 2" },
+    { "img": "/4.webp", "label": "Vista 3" },
+    { "img": "/5.webp", "label": "Vista 4" },
+    { "img": "/6.webp", "label": "Vista 5" },
+    { "img": "/7.webp", "label": "Vista 6" },
+    { "img": "/8.webp", "label": "Vista 7" },
+    { "img": "/9.webp", "label": "Vista 8" }
+  ]
+}

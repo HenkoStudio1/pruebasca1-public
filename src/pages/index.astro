@@ -1,0 +1,23 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Espacios from '../components/Espacios.astro';
+import Instalaciones from '../components/Instalaciones.astro';
+import VideoPromo from '../components/VideoPromo.astro';
+import TourVirtual from '../components/TourVirtual.astro';
+import Ubicacion from '../components/Ubicacion.astro';
+import Contacto from '../components/Contacto.astro';
+import Noticias from '../components/Noticias.astro';
+import site from '../data/site.json';
+---
+
+<Layout title={site.tituloSeo} description={site.descripcionSeo}>
+  <Hero />
+  <TourVirtual />
+  <Instalaciones />
+  <VideoPromo />
+  <Espacios />
+  <Noticias />
+  <Ubicacion />
+  <Contacto />
+</Layout>

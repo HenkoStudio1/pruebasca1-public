@@ -1,0 +1,13 @@
+{
+  "etiqueta": "El desarrollo",
+  "titulo": "Un espacio pensado para",
+  "tituloResaltado": "negocios que crecen",
+  "parrafo": "Plaza Paseo del Parque es un desarrollo comercial de usos mixtos ubicado en una de las zonas de mayor crecimiento de Tijuana. Diseñado para ofrecer a cada negocio la visibilidad, accesibilidad y comodidad que necesitan para prosperar.",
+  "ctaTexto": "Conocer más",
+  "caracteristicas": [
+    { "icono": "edificio", "titulo": "Construcción 2021", "desc": "Edificación moderna con materiales de primera calidad" },
+    { "icono": "estacionamiento", "titulo": "Estacionamiento amplio", "desc": "Cajones suficientes para clientes y colaboradores" },
+    { "icono": "usos-mixtos", "titulo": "Usos mixtos", "desc": "Comercial, oficinas, consultorios y servicios" },
+    { "icono": "seguridad", "titulo": "Seguridad 24/7", "desc": "Vigilancia profesional y acceso controlado" }
+  ]
+}

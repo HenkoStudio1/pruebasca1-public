@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Henko — Recorrido Virtual 360° | Plaza Paseo del Parque</title>
+<link rel="preload" href="1.webp" as="image" type="image/webp">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Playfair+Display:wght@400;500;600&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --henko-dark: #1a1a1a;
+  --henko-accent: #c8a96e;
+  --henko-glass: rgba(18, 18, 18, 0.72);
+  --radius-sm: 8px;
+  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Playfair Display', serif;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  background: #0a0a0a;
+  color: #fff;
+  cursor: grab;
+}
+body:active { cursor: grabbing; }
+
+#viewer { width: 100%; height: 100%; position: relative; }
+canvas { display: block; }
+
+.top-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
+  z-index: 100; pointer-events: none;
+}
+.top-bar > * { pointer-events: auto; }
+
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-logo {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--henko-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 600;
+  color: var(--henko-dark); letter-spacing: -0.5px;
+}
+.brand-text { display: flex; flex-direction: column; gap: 1px; }
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 500; color: #fff;
+  letter-spacing: 1.5px; text-transform: uppercase;
+}
+.brand-sub {
+  font-size: 11px; font-weight: 300;
+  color: rgba(255,255,255,0.55); letter-spacing: 0.5px;
+}
+
+.scene-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--henko-glass);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  padding: 8px 16px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.scene-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--henko-accent);
+  animation: pulse-dot 2s ease infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.scene-label { font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.85); }
+.scene-count { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.4); margin-left: 4px; }
+
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 24px 24px;
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%);
+  z-index: 100; pointer-events: none;
+}
+.bottom-bar > * { pointer-events: auto; }
+
+.scene-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.scene-thumb {
+  width: 72px; height: 72px; border-radius: var(--radius-sm);
+  overflow: hidden; border: 2px solid transparent;
+  cursor: pointer; transition: all 0.3s ease;
+  position: relative; opacity: 0.55;
+}
+.scene-thumb:hover { opacity: 0.85; transform: translateY(-2px); }
+.scene-thumb.active {
+  border-color: var(--henko-accent); opacity: 1; transform: translateY(-3px);
+}
+.scene-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.scene-thumb-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  font-size: 8px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: #fff; background: rgba(0,0,0,0.7);
+  padding: 3px 4px; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.controls-row { display: flex; align-items: center; gap: 12px; }
+.ctrl-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--henko-glass);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.75);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.25s ease; font-size: 16px;
+}
+.ctrl-btn:hover {
+  background: var(--henko-accent); color: var(--henko-dark);
+  border-color: var(--henko-accent);
+}
+.ctrl-btn svg { width: 18px; height: 18px; }
+
+.hotspot {
+  position: absolute; transform: translate(-50%, -50%);
+  z-index: 50; pointer-events: auto; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--henko-glass);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid var(--henko-accent);
+  border-radius: 24px;
+  padding: 7px 14px 7px 8px;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
+}
+.hotspot::before {
+  content: ''; position: absolute; inset: -5px;
+  border-radius: 28px;
+  border: 1px solid rgba(200, 169, 110, 0.25);
+  animation: hotspot-ring 2.5s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes hotspot-ring {
+  0% { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1.12); opacity: 0; }
+}
+.hotspot-inner {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(200, 169, 110, 0.15);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.3s ease;
+}
+.hotspot-inner svg { width: 15px; height: 15px; color: var(--henko-accent); transition: color 0.3s ease; }
+.hotspot:hover { background: var(--henko-accent); transform: translate(-50%, -50%) scale(1.05); }
+.hotspot:hover .hotspot-inner { background: rgba(26, 26, 26, 0.2); }
+.hotspot:hover .hotspot-inner svg { color: var(--henko-dark); }
+.hotspot:hover .hotspot-label { color: var(--henko-dark); }
+
+.hotspot-label {
+  position: static; transform: none;
+  white-space: nowrap;
+  font-size: 12px; font-weight: 500; color: #fff;
+  opacity: 1; pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.loading-overlay {
+  position: fixed; inset: 0; background: #0a0a0a;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 1000; transition: opacity 0.8s ease;
+}
+.loading-overlay.hidden { opacity: 0; pointer-events: none; }
+.loading-logo {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--henko-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 32px; font-weight: 600;
+  color: var(--henko-dark); margin-bottom: 24px;
+  animation: logo-breathe 2s ease infinite;
+}
+@keyframes logo-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.loading-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 500; color: #fff;
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+}
+.loading-subtitle {
+  font-size: 13px; font-weight: 300;
+  color: rgba(255,255,255,0.4); letter-spacing: 0.5px; margin-bottom: 32px;
+}
+.loading-bar-track {
+  width: 200px; height: 2px;
+  background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;
+}
+.loading-bar-fill {
+  height: 100%; background: var(--henko-accent);
+  border-radius: 2px; width: 0%; transition: width 0.3s ease;
+}
+
+.drag-hint {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: 10px;
+  background: var(--henko-glass);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  padding: 12px 20px; border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.06);
+  z-index: 90; animation: hint-fade 4s ease forwards;
+  pointer-events: none;
+}
+@keyframes hint-fade {
+  0%, 60% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.drag-hint-icon { width: 24px; height: 24px; color: var(--henko-accent); }
+.drag-hint span { font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.7); }
+
+.transition-overlay {
+  position: fixed; inset: 0; background: #0a0a0a;
+  z-index: 200; opacity: 0; pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.transition-overlay.active { opacity: 1; }
+
+.scene-loading {
+  position: fixed; inset: 0; z-index: 201;
+  display: none; align-items: center; justify-content: center;
+}
+.scene-loading.visible { display: flex; }
+.scene-loading-ring {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid rgba(200,169,110,0.2);
+  border-top-color: var(--henko-accent);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 640px) {
+  .top-bar { padding: 12px 16px; }
+  .brand-name { font-size: 13px; letter-spacing: 1px; }
+  .brand-logo { width: 32px; height: 32px; font-size: 15px; }
+  .scene-badge { padding: 6px 12px; }
+  .scene-label { font-size: 11px; }
+  .scene-thumb { width: 52px; height: 52px; }
+  .bottom-bar { padding: 0 16px 16px; }
+  .brand-sub { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">H</div>
+  <div class="loading-title">Henko</div>
+  <div class="loading-subtitle">Plaza Paseo del Parque — Recorrido 360°</div>
+  <div class="loading-bar-track">
+    <div class="loading-bar-fill" id="loadingBar"></div>
+  </div>
+  <p id="loadingError" style="display:none;margin-top:24px;font-size:12px;color:rgba(255,255,255,0.4);text-align:center;">
+    Abre el tour desde un servidor local:<br>
+    <code style="display:inline-block;margin-top:6px;padding:4px 10px;background:rgba(255,255,255,0.08);border-radius:4px;">python3 -m http.server 8080</code>
+  </p>
+</div>
+
+<div class="transition-overlay" id="transitionOverlay"></div>
+<div class="scene-loading" id="sceneLoading"><div class="scene-loading-ring"></div></div>
+
+<div id="viewer"></div>
+
+<div class="top-bar">
+  <div class="brand">
+    <div class="brand-logo">H</div>
+    <div class="brand-text">
+      <div class="brand-name">Henko</div>
+      <div class="brand-sub">Producción audiovisual</div>
+    </div>
+  </div>
+  <div class="scene-badge">
+    <div class="scene-dot"></div>
+    <span class="scene-label" id="sceneLabel">—</span>
+    <span class="scene-count" id="sceneCount">1 / 3</span>
+  </div>
+</div>
+
+<div class="drag-hint">
+  <svg class="drag-hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 9l4-4 4 4"/><path d="M9 5v14"/><path d="M19 15l-4 4-4-4"/><path d="M15 19V5"/>
+  </svg>
+  <span>Arrastra para explorar</span>
+</div>
+
+<div id="hotspotsContainer" style="position:fixed;inset:0;z-index:50;pointer-events:none;"></div>
+
+<div class="bottom-bar">
+  <div class="scene-nav" id="sceneNav"></div>
+  <div class="controls-row">
+    <button class="ctrl-btn" id="btnPrev" title="Anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="ctrl-btn" id="btnFullscreen" title="Pantalla completa">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+    </button>
+    <button class="ctrl-btn" id="btnNext" title="Siguiente">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function() {
+
+  const IMAGE_URLS = [
+    '1.webp',
+    '2.webp',
+    '3.webp',
+  ];
+  const THUMB_URLS = [
+    'thumb1.jpg',
+    'thumb2.jpg',
+    'thumb3.jpg',
+  ];
+
+  const scenes = [
+    {
+      id: 'area-general-1',
+      name: 'Áreas Generales 1',
+      imgIndex: 0,
+      hotspots: [
+        {
+          yaw: 1.2, pitch: -0.1,
+          label: 'Ir a Áreas Generales 2 →',
+          target: 'area-general-2',
+          arriveYaw: 0
+        },
+        {
+          yaw: 4.0, pitch: -0.1,
+          label: 'Ir a Áreas Generales 3 →',
+          target: 'area-general-3',
+          arriveYaw: 0
+        },
+      ]
+    },
+    {
+      id: 'area-general-2',
+      name: 'Áreas Generales 2',
+      imgIndex: 1,
+      hotspots: [
+        {
+          yaw: 1.2, pitch: -0.1,
+          label: 'Ir a Áreas Generales 3 →',
+          target: 'area-general-3',
+          arriveYaw: 0
+        },
+        {
+          yaw: 4.0, pitch: -0.1,
+          label: '← Ir a Áreas Generales 1',
+          target: 'area-general-1',
+          arriveYaw: 0
+        },
+      ]
+    },
+    {
+      id: 'area-general-3',
+      name: 'Áreas Generales 3',
+      imgIndex: 2,
+      hotspots: [
+        {
+          yaw: 1.2, pitch: -0.1,
+          label: '← Ir a Áreas Generales 1',
+          target: 'area-general-1',
+          arriveYaw: 0
+        },
+        {
+          yaw: 4.0, pitch: -0.1,
+          label: '← Ir a Áreas Generales 2',
+          target: 'area-general-2',
+          arriveYaw: 0
+        },
+      ]
+    },
+  ];
+
+  const container = document.getElementById('viewer');
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  container.appendChild(renderer.domElement);
+
+  const threeScene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 0, 0.01);
+
+  const geometry = new THREE.SphereGeometry(50, 64, 64);
+  const material = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.BackSide });
+  const sphere = new THREE.Mesh(geometry, material);
+  threeScene.add(sphere);
+
+  let lon = 0, lat = 0, phi = 0, theta = 0;
+  let isDown = false, startX = 0, startY = 0, startLon = 0, startLat = 0;
+  let targetLon = 0, targetLat = 0;
+  let autoRotate = true;
+  let currentSceneIndex = 0;
+
+  const textures = [];
+
+  function onPointerDown(e) {
+    isDown = true; autoRotate = false;
+    const pos = e.touches ? e.touches[0] : e;
+    startX = pos.clientX; startY = pos.clientY;
+    startLon = targetLon; startLat = targetLat;
+  }
+  let lastPinchDist = null;
+
+  function onPointerMove(e) {
+    if (e.touches && e.touches.length === 2) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (lastPinchDist !== null) {
+        camera.fov = Math.max(40, Math.min(100, camera.fov - (dist - lastPinchDist) * 0.1));
+        camera.updateProjectionMatrix();
+      }
+      lastPinchDist = dist;
+      return;
+    }
+    lastPinchDist = null;
+    if (!isDown) return;
+    const pos = e.touches ? e.touches[0] : e;
+    targetLon = (startX - pos.clientX) * 0.15 + startLon;
+    targetLat = (pos.clientY - startY) * 0.15 + startLat;
+    targetLat = Math.max(-85, Math.min(85, targetLat));
+  }
+  function onPointerUp() { isDown = false; lastPinchDist = null; }
+
+  renderer.domElement.addEventListener('mousedown', onPointerDown);
+  renderer.domElement.addEventListener('mousemove', onPointerMove);
+  renderer.domElement.addEventListener('touchstart', onPointerDown, { passive: true });
+  renderer.domElement.addEventListener('touchmove', onPointerMove, { passive: false });
+  renderer.domElement.addEventListener('touchend', onPointerUp);
+  document.addEventListener('mouseup', onPointerUp);
+
+  renderer.domElement.addEventListener('wheel', (e) => {
+    camera.fov = Math.max(40, Math.min(100, camera.fov + e.deltaY * 0.03));
+    camera.updateProjectionMatrix();
+  }, { passive: true });
+
+  const loader = new THREE.TextureLoader();
+  loader.crossOrigin = '';
+
+  function loadTexture(url) {
+    return new Promise((resolve, reject) => {
+      loader.load(
+        url,
+        (tex) => {
+          tex.minFilter = THREE.LinearFilter;
+          tex.generateMipmaps = false;
+          tex.wrapS = THREE.RepeatWrapping;
+          tex.repeat.set(-1, 1);
+          tex.offset.set(1, 0);
+          resolve(tex);
+        },
+        undefined,
+        reject
+      );
+    });
+  }
+
+  const hotspotsContainer = document.getElementById('hotspotsContainer');
+  const transitionOverlay = document.getElementById('transitionOverlay');
+  const sceneLoading      = document.getElementById('sceneLoading');
+
+  let hotspotEls = [];
+  const _camDir  = new THREE.Vector3();
+  const _dir     = new THREE.Vector3();
+
+  function buildHotspots() {
+    hotspotsContainer.innerHTML = '';
+    hotspotEls = [];
+    scenes[currentSceneIndex].hotspots.forEach(hs => {
+      const el = document.createElement('div');
+      el.className = 'hotspot';
+      el.innerHTML =
+        '<div class="hotspot-inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>' +
+        '<div class="hotspot-label">' + hs.label + '</div>';
+      el.addEventListener('click', () => {
+        const targetIdx = scenes.findIndex(s => s.id === hs.target);
+        if (targetIdx >= 0) loadScene(targetIdx, hs.arriveYaw);
+      });
+      hotspotsContainer.appendChild(el);
+      hotspotEls.push({ el, hs });
+    });
+  }
+
+  function updateHotspots() {
+    camera.getWorldDirection(_camDir);
+    hotspotEls.forEach(({ el, hs }) => {
+      _dir.set(
+        Math.cos(hs.pitch) * Math.sin(hs.yaw),
+        Math.sin(hs.pitch),
+        Math.cos(hs.pitch) * Math.cos(hs.yaw)
+      );
+      if (_dir.dot(_camDir) < 0) {
+        el.style.display = 'none';
+        return;
+      }
+      const projected = _dir.clone().project(camera);
+      el.style.display = '';
+      el.style.left = ((projected.x * 0.5 + 0.5) * window.innerWidth)  + 'px';
+      el.style.top  = ((-projected.y * 0.5 + 0.5) * window.innerHeight) + 'px';
+    });
+  }
+
+  function applyTexture(tex) {
+    sphere.material.map = tex;
+    sphere.material.color.set(0xffffff);
+    sphere.material.needsUpdate = true;
+  }
+
+  let isTransitioning = false;
+  const DEFAULT_FOV = 75;
+  const ZOOM_IN_FOV = 30;
+  const ZOOM_IN_DURATION = 600;
+  const ZOOM_OUT_DURATION = 800;
+
+  function animateFOV(fromFOV, toFOV, duration) {
+    return new Promise(resolve => {
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min((now - start) / duration, 1);
+        const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        camera.fov = fromFOV + (toFOV - fromFOV) * ease;
+        camera.updateProjectionMatrix();
+        if (t < 1) requestAnimationFrame(tick);
+        else resolve();
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function loadScene(index, arriveYaw) {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    const scene = scenes[index];
+    const startFOV = camera.fov;
+
+    // Phase 1: Zoom in
+    animateFOV(startFOV, ZOOM_IN_FOV, ZOOM_IN_DURATION).then(() => {
+      // Phase 2: Fade to black at peak zoom
+      transitionOverlay.classList.add('active');
+
+      const texReady = textures[scene.imgIndex] instanceof THREE.Texture
+        ? Promise.resolve(textures[scene.imgIndex])
+        : (function() {
+            sceneLoading.classList.add('visible');
+            const pending = textures[scene.imgIndex] instanceof Promise
+              ? textures[scene.imgIndex]
+              : (textures[scene.imgIndex] = loadTexture(IMAGE_URLS[scene.imgIndex]));
+            return pending.then(tex => {
+              textures[scene.imgIndex] = tex;
+              sceneLoading.classList.remove('visible');
+              return tex;
+            });
+          })();
+
+      texReady.then(tex => {
+        setTimeout(() => {
+          doSwitch(index, tex, arriveYaw, startFOV);
+        }, 400);
+      });
+    });
+  }
+
+  function doSwitch(index, tex, arriveYaw, restoreFOV) {
+    currentSceneIndex = index;
+    const scene = scenes[index];
+    applyTexture(tex);
+
+    if (arriveYaw !== undefined) {
+      lon = arriveYaw;
+      targetLon = arriveYaw;
+      lat = 0;
+      targetLat = 0;
+    }
+
+    document.getElementById('sceneLabel').textContent = scene.name;
+    document.getElementById('sceneCount').textContent = (index + 1) + ' / ' + scenes.length;
+    document.querySelectorAll('.scene-thumb').forEach((el, i) => {
+      el.classList.toggle('active', i === index);
+    });
+    autoRotate = false;
+    buildHotspots();
+
+    // Phase 3: Fade in + zoom out to normal
+    transitionOverlay.classList.remove('active');
+    const targetFOV = restoreFOV || DEFAULT_FOV;
+    animateFOV(ZOOM_IN_FOV, targetFOV, ZOOM_OUT_DURATION).then(() => {
+      isTransitioning = false;
+    });
+  }
+
+  const navEl = document.getElementById('sceneNav');
+  scenes.forEach((scene, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'scene-thumb' + (i === 0 ? ' active' : '');
+    const img = document.createElement('img');
+    img.src = THUMB_URLS[scene.imgIndex];
+    img.alt = scene.name;
+    const label = document.createElement('div');
+    label.className = 'scene-thumb-label';
+    label.textContent = scene.name;
+    thumb.appendChild(img);
+    thumb.appendChild(label);
+    thumb.addEventListener('click', () => loadScene(i));
+    navEl.appendChild(thumb);
+  });
+
+  document.getElementById('btnPrev').addEventListener('click', () => {
+    loadScene((currentSceneIndex - 1 + scenes.length) % scenes.length, undefined);
+  });
+  document.getElementById('btnNext').addEventListener('click', () => {
+    loadScene((currentSceneIndex + 1) % scenes.length, undefined);
+  });
+  document.getElementById('btnFullscreen').addEventListener('click', () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    else document.exitFullscreen();
+  });
+
+  const _lookTarget = new THREE.Vector3();
+  let   rafId = null;
+
+  function animate() {
+    rafId = requestAnimationFrame(animate);
+    if (autoRotate) targetLon += 0.03;
+    lon += (targetLon - lon) * 0.08;
+    lat += (targetLat - lat) * 0.08;
+    phi   = THREE.MathUtils.degToRad(90 - lat);
+    theta = THREE.MathUtils.degToRad(lon);
+    _lookTarget.set(
+      Math.sin(phi) * Math.cos(theta),
+      Math.cos(phi),
+      Math.sin(phi) * Math.sin(theta)
+    );
+    camera.lookAt(_lookTarget);
+    renderer.render(threeScene, camera);
+    updateHotspots();
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    } else if (rafId === null) {
+      animate();
+    }
+  });
+
+  const loadingBar     = document.getElementById('loadingBar');
+  const loadingOverlay = document.getElementById('loadingOverlay');
+
+  loadingBar.style.width = '10%';
+
+  loadTexture(IMAGE_URLS[0]).then(tex => {
+    textures[0] = tex;
+    loadingBar.style.width = '100%';
+
+    setTimeout(() => {
+      loadingOverlay.classList.add('hidden');
+      applyTexture(tex);
+      document.getElementById('sceneLabel').textContent = scenes[0].name;
+      buildHotspots();
+      animate();
+
+      scenes.slice(1).forEach(scene => {
+        if (!(textures[scene.imgIndex] instanceof THREE.Texture)) {
+          textures[scene.imgIndex] = loadTexture(IMAGE_URLS[scene.imgIndex])
+            .then(t => { textures[scene.imgIndex] = t; return t; })
+            .catch(() => { textures[scene.imgIndex] = null; });
+        }
+      });
+    }, 500);
+  }).catch(() => {
+    loadingBar.style.width = '0%';
+    document.getElementById('loadingError').style.display = 'block';
+  });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+})();
+</script>
+</body>
+</html>

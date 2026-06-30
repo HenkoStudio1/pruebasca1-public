@@ -1,0 +1,56 @@
+{
+  "etiqueta": "Disponibles ahora",
+  "titulo": "Espacios disponibles",
+  "items": [
+    {
+      "nombre": "Local A",
+      "ubicacion": "Planta baja",
+      "metros": 85,
+      "tipo": "Local comercial",
+      "status": "Disponible",
+      "precio": "Cotizar precio",
+      "img": "/local1.jpg",
+      "visible": true
+    },
+    {
+      "nombre": "Suite B",
+      "ubicacion": "Piso 1",
+      "metros": 120,
+      "tipo": "Oficina",
+      "status": "Apartado",
+      "precio": "Cotizar precio",
+      "img": "/oficina1.jpg",
+      "visible": true
+    },
+    {
+      "nombre": "Local C",
+      "ubicacion": "Esquina",
+      "metros": 210,
+      "tipo": "Local comercial",
+      "status": "Destacado",
+      "precio": "Cotizar precio",
+      "img": "/local2.jpg",
+      "visible": true
+    },
+    {
+      "nombre": "Local D",
+      "ubicacion": "Piso 2",
+      "metros": 95,
+      "tipo": "Oficina",
+      "status": "Disponible",
+      "precio": "Cotizar precio",
+      "img": "/oficina2.jpg",
+      "visible": true
+    },
+    {
+      "nombre": "Suite Henko",
+      "ubicacion": "Piso 4",
+      "metros": 200,
+      "tipo": "Oficina",
+      "status": "Ocupado",
+      "precio": "Cotizar precio",
+      "img": "https://picsum.photos/id/132/1920/1280.webp",
+      "visible": true
+    }
+  ]
+}

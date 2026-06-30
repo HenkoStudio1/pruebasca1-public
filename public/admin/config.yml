@@ -1,0 +1,215 @@
+backend:
+  name: github
+  repo: HenkoStudio1/pruebasca1
+  branch: main
+  base_url: https://pruebasca1.vercel.app   # <-- confirmar/ajustar al dominio real de Vercel
+  auth_endpoint: api/auth
+
+# Las imágenes subidas desde el CMS se guardan en /public y se referencian desde la raíz
+media_folder: "public"
+public_folder: "/"
+
+locale: es
+
+# Marca del panel (login, encabezado, favicon)
+app_title: "Panel de Administración"
+logo:
+  src: /logo_2.png
+
+# ----------------------------------------------------------------------------
+# Colecciones: contenido con varias entradas (lista necesaria)
+# ----------------------------------------------------------------------------
+collections:
+  - name: noticias
+    label: "Noticias y promociones"
+    label_singular: "Noticia"
+    icon: newspaper
+    folder: "src/content/noticias"
+    create: true
+    slug: "{{slug}}"
+    identifier_field: title
+    extension: md
+    format: frontmatter
+    editor:
+      preview: true
+    summary: "{{title}} — {{date}}"
+    sortable_fields: [date, title]
+    fields:
+      - { name: title, label: "Título", widget: string }
+      - name: date
+        label: "Fecha"
+        widget: datetime
+        format: "YYYY-MM-DD"
+        date_format: "DD/MM/YYYY"
+        time_format: false
+      - { name: image, label: "Imagen", widget: image, required: false }
+      - { name: resumen, label: "Resumen (vista en tarjeta)", widget: text, required: false }
+      - { name: published, label: "Publicada", widget: boolean, default: true, hint: "Apágala para ocultar la noticia del sitio." }
+      - { name: body, label: "Contenido", widget: markdown }
+
+# ----------------------------------------------------------------------------
+# Singletons: secciones de archivo único. Abren directo desde el menú,
+# sin pantalla intermedia. Ordenadas según aparecen en el sitio.
+# ----------------------------------------------------------------------------
+singletons:
+  - name: hero
+    label: "Portada (Hero)"
+    file: "src/data/hero.json"
+    icon: home
+    fields:
+      - name: imagenFondo
+        label: "Imagen de fondo"
+        widget: image
+        hint: "Imagen de fondo de la portada. Se recomienda horizontal y de buena resolución (mín. 1920px de ancho)."
+      - { name: badge, label: "Etiqueta superior", widget: string }
+      - { name: titulo, label: "Título", widget: string }
+      - { name: tituloResaltado, label: "Título (parte resaltada)", widget: string }
+      - name: subtitulo
+        label: "Subtítulo"
+        widget: markdown
+        buttons: [bold, italic, link]
+        editor_components: []
+        minimal: true
+        hint: "Permite negritas, cursivas y enlaces."
+      - { name: statAreaValor, label: "Stat 1 — valor", widget: string }
+      - { name: statAreaLabel, label: "Stat 1 — etiqueta", widget: string }
+      - { name: statCentro, label: "Stat 2 — texto central", widget: string }
+      - { name: statUbicacionValor, label: "Stat 3 — valor", widget: string }
+      - { name: statUbicacionLabel, label: "Stat 3 — etiqueta", widget: string }
+
+  - name: tour
+    label: "Tour Virtual 360°"
+    file: "src/data/tour.json"
+    icon: panorama
+    fields:
+      - { name: etiqueta, label: "Etiqueta superior", widget: string }
+      - { name: titulo, label: "Título de la sección", widget: string }
+      - { name: subtitulo, label: "Subtítulo", widget: text }
+      - name: vistas
+        label: "Vistas 360°"
+        label_singular: "Vista"
+        widget: list
+        summary: "{{fields.label}}"
+        fields:
+          - { name: img, label: "Imagen panorámica (equirectangular)", widget: image }
+          - { name: label, label: "Nombre de la vista", widget: string }
+
+  - name: desarrollo
+    label: "El desarrollo"
+    file: "src/data/desarrollo.json"
+    icon: apartment
+    fields:
+      - { name: etiqueta, label: "Etiqueta superior", widget: string }
+      - { name: titulo, label: "Título", widget: string }
+      - { name: tituloResaltado, label: "Título (parte resaltada)", widget: string }
+      - { name: parrafo, label: "Párrafo", widget: text }
+      - { name: ctaTexto, label: "Texto del enlace", widget: string }
+      - name: caracteristicas
+        label: "Características"
+        label_singular: "Característica"
+        widget: list
+        summary: "{{fields.titulo}}"
+        fields:
+          - name: icono
+            label: "Icono"
+            widget: select
+            options: ["edificio", "estacionamiento", "usos-mixtos", "seguridad", "reloj", "ubicacion", "estrella"]
+          - { name: titulo, label: "Título", widget: string }
+          - { name: desc, label: "Descripción", widget: string }
+
+  - name: video
+    label: "Video promocional"
+    file: "src/data/video.json"
+    icon: movie
+    fields:
+      - { name: titulo, label: "Título", widget: string }
+      - { name: subtitulo, label: "Subtítulo", widget: string }
+      - name: youtubeId
+        label: "ID del video de YouTube"
+        widget: string
+        hint: "Solo el ID, no la URL completa. En 'youtube.com/watch?v=ABC123' el ID es ABC123."
+
+  - name: espacios
+    label: "Espacios / Locales"
+    file: "src/data/espacios.json"
+    icon: storefront
+    fields:
+      - { name: etiqueta, label: "Etiqueta superior", widget: string }
+      - { name: titulo, label: "Título de la sección", widget: string }
+      - name: items
+        label: "Espacios"
+        label_singular: "Espacio"
+        widget: list
+        summary: "{{fields.nombre}} — {{fields.metros}} m²"
+        fields:
+          - { name: nombre, label: "Nombre", widget: string }
+          - { name: ubicacion, label: "Ubicación", widget: string }
+          - { name: metros, label: "Metros (m²)", widget: number, value_type: int, min: 0 }
+          - name: tipo
+            label: "Tipo"
+            widget: select
+            options: ["Local comercial", "Oficina"]
+          - name: status
+            label: "Estatus"
+            widget: select
+            options: ["Disponible", "Destacado", "Apartado", "Ocupado"]
+          - { name: precio, label: "Precio", widget: string, default: "Cotizar precio" }
+          - { name: img, label: "Imagen", widget: image }
+          - name: visible
+            label: "Mostrar en el sitio"
+            widget: boolean
+            default: true
+            hint: "Apágalo para ocultar este espacio sin borrarlo."
+
+  - name: ubicacion
+    label: "Ubicación"
+    file: "src/data/ubicacion.json"
+    icon: location_on
+    fields:
+      - { name: etiqueta, label: "Etiqueta superior", widget: string }
+      - { name: titulo, label: "Título de la sección", widget: string }
+      - name: mapaUrl
+        label: "URL del mapa (embed de Google Maps)"
+        widget: string
+        hint: "En Google Maps: Compartir → Insertar un mapa → copia solo la URL del src."
+      - name: puntos
+        label: "Puntos cercanos"
+        label_singular: "Punto"
+        widget: list
+        summary: "{{fields.name}} — {{fields.time}}"
+        fields:
+          - { name: name, label: "Lugar", widget: string }
+          - { name: time, label: "Tiempo", widget: string }
+
+  - name: contacto
+    label: "Contacto"
+    file: "src/data/contacto.json"
+    icon: call
+    fields:
+      - { name: etiqueta, label: "Etiqueta superior", widget: string }
+      - { name: tituloInicio, label: "Título — inicio", widget: string }
+      - { name: tituloResaltado, label: "Título — parte resaltada", widget: string }
+      - { name: tituloFin, label: "Título — final", widget: string }
+      - { name: intro, label: "Texto introductorio", widget: text }
+      - name: whatsapp
+        label: "WhatsApp (solo números, con lada país)"
+        widget: string
+        pattern: ['^[0-9]+$', "Solo números, sin espacios ni signos. Ej: 526645491305"]
+        hint: "Ej: 526645491305 (52 = México, 664 = Tijuana)."
+      - { name: telefono, label: "Teléfono (como se muestra)", widget: string }
+      - { name: horario, label: "Horario", widget: string }
+      - { name: email, label: "Correo", widget: string }
+      - { name: direccion, label: "Dirección", widget: text, hint: "Una línea por renglón." }
+
+  - divider: true
+
+  - name: site
+    label: "Sitio (SEO y generales)"
+    file: "src/data/site.json"
+    icon: settings
+    fields:
+      - { name: tituloSeo, label: "Título SEO (pestaña / Google)", widget: string }
+      - { name: descripcionSeo, label: "Descripción SEO", widget: text }
+      - { name: navbarCta, label: "Botón del menú (CTA)", widget: string }
+      - { name: footerDescripcion, label: "Descripción del footer", widget: text }
+      - { name: footerCreditos, label: "Créditos del footer", widget: string }

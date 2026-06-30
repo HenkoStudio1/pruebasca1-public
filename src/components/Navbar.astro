@@ -1,0 +1,88 @@
+---
+import site from '../data/site.json';
+const links = [
+  { label: 'Espacios', href: '/#espacios' },
+  { label: 'Instalaciones', href: '/#instalaciones' },
+  { label: 'Tour Virtual', href: '/#tour' },
+  { label: 'Noticias', href: '/#noticias' },
+  { label: 'Ubicación', href: '/#ubicacion' },
+  { label: 'Contacto', href: '/#contacto' },
+];
+---
+
+<nav
+  id="navbar"
+  class="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm transition-all duration-300 border-b border-border"
+  style="background-color: rgba(255, 255, 255, 0.95);"
+>
+  <div class="max-w-[1310px] mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-[70px]">
+      <!-- Logo -->
+      <a href="/" class="flex items-center">
+        <img src="/logo.png" alt="Plaza Paseo del Parque" class="h-14 w-auto" />
+      </a>
+
+      <!-- Desktop links -->
+      <div class="hidden lg:flex items-center gap-6">
+        {links.map(link => (
+          <a
+            href={link.href}
+            class="text-dark hover:text-primary text-xs font-semibold uppercase tracking-wider transition-colors duration-200"
+          >
+            {link.label}
+          </a>
+        ))}
+        <a
+          href="/#contacto"
+          class="bg-primary text-white font-semibold text-xs uppercase tracking-wider px-6 py-3 rounded hover:bg-primary-dark transition-colors duration-200"
+        >
+          {site.navbarCta}
+        </a>
+      </div>
+
+      <!-- Mobile menu button -->
+      <button
+        id="mobile-menu-btn"
+        class="lg:hidden text-dark p-2"
+        aria-label="Abrir menú"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-border">
+    <div class="px-4 py-4 space-y-1">
+      {links.map(link => (
+        <a
+          href={link.href}
+          class="mobile-link block text-dark hover:text-primary text-sm font-medium py-2.5 border-b border-border/50"
+        >
+          {link.label}
+        </a>
+      ))}
+      <a
+        href="/#contacto"
+        class="mobile-link block bg-primary text-white font-semibold text-sm px-5 py-3 rounded text-center mt-3"
+      >
+        {site.navbarCta}
+      </a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  btn?.addEventListener('click', () => {
+    menu?.classList.toggle('hidden');
+  });
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    link.addEventListener('click', () => {
+      menu?.classList.add('hidden');
+    });
+  });
+</script>

@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #c0d52e;
+  --color-primary-dark: #a1b323;
+  --color-secondary: #61ce70;
+  --color-secondary-dark: #4fb85d;
+  --color-navy: #424912;
+  --color-navy-deep: #2c310c;
+  --color-dark: #222222;
+  --color-gray-bg: #f8f8f8;
+  --color-border: #ededed;
+  --color-text-light: #666666;
+  --color-text-muted: #999999;
+  --color-whatsapp: #25D366;
+
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  color: var(--color-dark);
+  background-color: var(--color-gray-bg);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+::selection {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.12);
+}
+
+.img-zoom {
+  overflow: hidden;
+}
+.img-zoom img,
+.img-zoom .img-placeholder {
+  transition: transform 0.5s ease;
+}
+.img-zoom:hover img,
+.img-zoom:hover .img-placeholder {
+  transform: scale(1.05);
+}
