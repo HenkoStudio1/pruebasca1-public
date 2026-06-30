@@ -1,6 +1,6 @@
-# Plaza Paseo del Parque
+# Paseo del Parque
 
-Landing page del desarrollo comercial Plaza Paseo del Parque, con tour virtual 360° y panel de administración de contenido vía CMS.
+Landing page del desarrollo comercial Paseo del Parque, con tour virtual 360° y panel de administración de contenido vía CMS.
 
 ## Stack
 
